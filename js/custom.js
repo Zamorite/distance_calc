@@ -8,6 +8,7 @@ var _fuelConsumed;
 var markers = [];
 var total = 0;
 var _price = 38.10;
+var loaded = false;
 
 function initMap() {
   var service = new google.maps.DistanceMatrixService();
@@ -29,16 +30,32 @@ function initMap() {
 
   // Listen direction change
   directionsDisplay.addListener('directions_changed', function () {
+
+    if (!loaded) {
+      document.querySelector('#col').innerHTML = "<section id='results'><div id='warnings-panel'></div><div id='total'></div></section>";
+
+      loaded = true;
+    }
+    
     computeTotalDistance(directionsDisplay.getDirections());
   });
 
   // Instantiate an info window to hold step text.
   var stepDisplay = new google.maps.InfoWindow;
 
+
+
   // Display the route between the initial start and end selections.
   calculateAndDisplayRoute( directionsDisplay, directionsService, markers, stepDisplay, map );
   // Listen to change events from the start and end lists.
   var onChangeHandler = function () {
+
+    if (!loaded) {
+      document.querySelector('#col').innerHTML = "<section id='results'><div id='warnings-panel'></div><div id='total'></div></section>";
+
+      loaded = true;
+    }
+
     calculateAndDisplayRoute(directionsDisplay, directionsService, markers, stepDisplay, map);
   };
   document.getElementById('start').addEventListener('change', onChangeHandler);
@@ -49,6 +66,10 @@ function initMap() {
   }
 
   function computeTotalDistance(result) {
+
+    var spinner = document.querySelector('#spinner');
+    spinner.classList.add('d-block');
+
     var myroute = result.routes[0];
     var duration, start, end;
     for (var i = 0; i < myroute.legs.length; i++) {
@@ -56,16 +77,22 @@ function initMap() {
       duration = myroute.legs[i].duration.value;  
       start = myroute.legs[i].start_address;
       end = myroute.legs[i].end_address;
-      document.getElementById("start").value = start;
-      document.getElementById("end").value = end;
+      document.querySelector("#start").value = start;
+      document.querySelector("#end").value = end;
     }
     total = total / 1000;
     _distance = total;
-    document.getElementById('total').innerHTML = "<h3> <i class='fa fa-play'></i> From <br>" + start + "</h3> <h3><i class='fa fa-stop'></i> To <br>" + end + "</h3> <h3><i class='fa fa-clipboard-check'></i> Total Distance <br>" + total + ' km </h3>' + "<h3><i class='fa fa-clock'></i> Travel Estimated Duration <br>" + duration + " Seconds</h3>";
+
+    document.querySelector('#total').innerHTML = "<h3> <i class='fa fa-play'></i> <small>From:</small> &nbsp; &nbsp; &nbsp;" + start + "</h3> <h3><i class='fa fa-stop'></i> <small>To:</small> &nbsp; &nbsp; &nbsp;" + end + "</h3> <h3><i class='fa fa-clipboard-check'></i> <small>Total Distance:</small> &nbsp; &nbsp; &nbsp;" + total + ' km </h3>' + "<h3><i class='fa fa-clock'></i> <small>Est. Travel Duration:</small> &nbsp; &nbsp; &nbsp;" + duration + " Seconds</h3>";
+    
+    spinner.classList.remove('d-block');
+
+    document.querySelector('.body').innerHTML = "<div class='container'><div class='chevron'></div><div class='chevron'></div><div class='chevron'></div><span class='text'>Scroll down</span></div>"
   }
 
   function calculateAndDisplayRoute(directionsDisplay, directionsService,
     markers, stepDisplay, map) {
+
     // First, remove any existing markers from the map.
     for (var i = 0; i < markers.length; i++) {
       markers[i].setMap(null);
