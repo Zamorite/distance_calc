@@ -199,5 +199,7 @@ input.form-control:focus, select.form-control:focus {
     min-height: 50vh;
   }
 
-  #results {font-weight: smaller;}
+  #total h3 { 
+    font-size: small;
+   }
 }
